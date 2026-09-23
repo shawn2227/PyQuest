@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center; min-height: 70vh; margin: 2rem 0;">
+    <div class="glass-card" style="width: 100%; max-width: 500px;">
+        <h2 style="text-align: center; margin-bottom: 0.5rem; font-size: 1.8rem;">Request <span class="gradient-text">Clearance</span></h2>
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Register your operative identity</p>
+        
+        <form method="POST" action="{{ url_for('register') }}" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div>
+                <label for="username" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Operative Callsign (Username)</label>
+                <input type="text" id="username" name="username" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; outline: none;">
+            </div>
+            
+            <div>
+                <label for="email" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Secure Comms (Email)</label>
+                <input type="email" id="email" name="email" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; outline: none;">
+            </div>
+            
+            <div>
+                <label for="password" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Encryption Key (Password)</label>
+                <input type="password" id="password" name="password" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; outline: none;">
+            </div>
+            
+            <div>
+                <label for="avatar" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Select Avatar Identity</label>
+                <select id="avatar" name="avatar" style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; outline: none; appearance: none;">
+                    <option value="cyber_fox">Cyber Fox 🦊</option>
+                    <option value="neon_cat">Neon Cat 🐱</option>
+                    <option value="ghost_bot">Ghost Bot 🤖</option>
+                    <option value="pixel_wolf">Pixel Wolf 🐺</option>
+                    <option value="glitch_panda">Glitch Panda 🐼</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-glow btn-primary" style="margin-top: 1rem; width: 100%;">Establish Identity ⚡</button>
+        </form>
+        
+        <p style="text-align: center; margin-top: 2rem; font-size: 0.9rem; color: var(--text-secondary);">
+            Already registered? <a href="{{ url_for('login') }}" style="color: var(--neon-purple); text-decoration: none; font-weight: 600;">Login here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div style="display: flex; gap: 1rem;">
+        <a href="{{ url_for('category_detail', slug=quest.cat_slug) }}" class="btn-outline" style="padding: 0.4rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600;">← Sector</a>
+        <a href="{{ url_for('learn_arena', quest_id=quest.id) }}" class="btn-outline" style="padding: 0.4rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; color: var(--neon-cyan); border-color: rgba(6, 182, 212, 0.3);">Review Intel 📚</a>
+    </div>
+    
+    <div style="display: flex; gap: 0.5rem;">
+        {% if prev_quest %}
+        <a href="{{ url_for('learn_arena', quest_id=prev_quest.id) }}" class="btn-outline" style="padding: 0.4rem 0.8rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem;">Prev</a>
+        {% endif %}
+        {% if next_quest %}
+        <a href="{{ url_for('learn_arena', quest_id=next_quest.id) }}" class="btn-outline" style="padding: 0.4rem 0.8rem; border-radius: 8px; text-decoration: none; font-size: 0.85rem;">Next</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="quest-layout">
+    <!-- LEFT PANEL: Briefing -->
+    <div class="quest-briefing">
+        <div class="quest-title-bar">
+            <div>
+                <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: {{ quest.accent_color }}; letter-spacing: 1px;">{{ quest.cat_title }}</span>
+                <h1 style="font-size: 1.75rem; font-weight: 800; margin-top: 0.2rem;">{{ quest.title }}</h1>
+            </div>
+            <div style="text-align: right;">
+                <div class="xp-badge" style="margin-bottom: 0.25rem;">+{{ quest.xp_reward }} XP</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700;">{{ quest.difficulty }}</div>
+            </div>
+        </div>
+        
+        <div class="story-box">
+            {{ quest.story_hook }}
+        </div>
+        
+        <div class="instructions-box">
+            <h3>📋 Mission Objectives</h3>
+            <div style="font-size: 0.95rem; line-height: 1.6; color: var(--text-primary);">
+                {{ quest.instructions | safe }}
+            </div>
+        </div>
+        
+        {% if quest.hint %}
+        <details class="hint-drawer">
+            <summary style="font-weight: 700; outline: none;">💡 Decode Hint</summary>
+            <div style="margin-top: 0.75rem; line-height: 1.5;">
+                {{ quest.hint }}
+            </div>
+        </details>
+        {% endif %}
+        
+        {% if is_completed %}
+        <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--neon-green); padding: 1rem; border-radius: 12px; text-align: center; color: var(--neon-green); font-weight: 700;">
+            ✓ MISSION ACCOMPLISHED
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- RIGHT PANEL: IDE -->
+    <div class="editor-wrapper">
+        <div class="editor-header">
+            <div class="editor-title">
+                <span style="color: var(--neon-purple);">></span> main.py
+            </div>
+            <div class="editor-actions">
+                <button id="runCodeBtn" class="btn-glow btn-primary" style="padding: 0.4rem 1.25rem; font-size: 0.85rem; border-radius: 8px;">Run Code ▶</button>
+            </div>
+        </div>
+        
+        <textarea id="codeEditor" class="code-textarea" spellcheck="false">{{ code }}</textarea>
+        
+        <div class="terminal-box">
+            <div class="terminal-header">
+                <span>Terminal Output</span>
+                <span id="runStatus">Ready</span>
+            </div>
+            <div id="terminalOutput" style="font-size: 0.9rem;">Waiting for execution...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('runCodeBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('runCodeBtn');
+    const code = document.getElementById('codeEditor').value;
+    const terminal = document.getElementById('terminalOutput');
+    const status = document.getElementById('runStatus');
+    
+    btn.disabled = true;
+    btn.innerHTML = '⚙ Running...';
+    terminal.innerHTML = '<span style="color: var(--neon-cyan);">Compiling and running tests...</span>';
+    status.innerText = 'Running';
+    status.style.color = 'var(--neon-amber)';
+    
+    function escapeHTML(str) {
+        return str.replace(/[&<>'"]/g, 
+            tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag]));
+    }
+    
+    try {
+        const response = await fetch('/api/run-code/{{ quest.id }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            let html = '';
+            
+            if (result.stdout) {
+                html += `<div class="terminal-stdout">${escapeHTML(result.stdout)}</div>`;
+            }
+            if (result.stderr) {
+                html += `<div class="terminal-stderr">${escapeHTML(result.stderr)}</div>`;
+            }
+            
+            if (result.success) {
+                status.innerText = 'SUCCESS';
+                status.style.color = 'var(--neon-green)';
+                html += `<div class="terminal-pass" style="margin-top: 1rem;">🔥 ${result.message}</div>`;
+                
+                if (result.xp_gained > 0 && !result.already_completed) {
+                    html += `<div style="color: var(--neon-amber); margin-top: 0.5rem; font-weight: 700;">+${result.xp_gained} XP Awarded!</div>`;
+                }
+                if (result.new_level) {
+                    html += `<div style="color: var(--neon-purple); margin-top: 0.5rem; font-weight: 700; font-size: 1.1rem;">🎉 LEVEL UP → Level ${result.new_level}!</div>`;
+                }
+                if (result.new_badges && result.new_badges.length > 0) {
+                    html += `<div style="color: var(--neon-cyan); margin-top: 0.5rem; font-weight: 700;">🏆 Badge Unlocked: ${result.new_badges.join(', ')}</div>`;
+                }
+            } else {
+                status.innerText = 'FAILED';
+                status.style.color = 'var(--neon-pink)';
+                html += `<div class="terminal-stderr" style="margin-top: 1rem; font-weight: 700;">${result.message}</div>`;
+            }
+            
+            terminal.innerHTML = html;
+        } else {
+            status.innerText = 'ERROR';
+            status.style.color = 'var(--neon-pink)';
+            terminal.innerHTML = `<div class="terminal-stderr">${result.error || 'Server error occurred.'}</div>`;
+        }
+    } catch (err) {
+        status.innerText = 'FAILED';
+        status.style.color = 'var(--neon-pink)';
+        terminal.innerHTML = `<div class="terminal-stderr">Network error connecting to server.</div>`;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Run Code ▶';
+    }
+});
+</script>
+{% endblock %}

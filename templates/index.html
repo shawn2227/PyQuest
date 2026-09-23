@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-tag">Welcome to the Matrix</div>
+    <h1 class="hero-title"><span class="gradient-text">Learn Python Like a Game</span></h1>
+    <p class="hero-subtitle">Step into the ultimate gamified learning arena for Gen-Z students. Train your coding skills, conquer quests, and become a legendary operative.</p>
+    
+    <div class="hero-actions">
+        <a href="{{ url_for('register') }}" class="btn-glow btn-primary">Start Your Journey ⚡</a>
+        <a href="{{ url_for('login') }}" class="btn-glow btn-outline">Login</a>
+    </div>
+</section>
+
+<section style="margin-top: 3rem; text-align: center;">
+    <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+        <div class="glass-card" style="min-width: 200px;">
+            <h3 style="font-size: 2rem; color: var(--neon-cyan);">{{ total_quests }}</h3>
+            <p style="color: var(--text-secondary);">Active Quests</p>
+        </div>
+        <div class="glass-card" style="min-width: 200px;">
+            <h3 style="font-size: 2rem; color: var(--neon-purple);">{{ total_users }}</h3>
+            <p style="color: var(--text-secondary);">Registered Players</p>
+        </div>
+        <div class="glass-card" style="min-width: 200px;">
+            <h3 style="font-size: 2rem; color: var(--neon-green);">{{ categories|length }}</h3>
+            <p style="color: var(--text-secondary);">Cyber Tiers</p>
+        </div>
+    </div>
+</section>
+
+<section style="margin-top: 4rem;">
+    <h2 style="text-align: center; font-size: 2rem; margin-bottom: 2rem;">Explore <span class="gradient-text">Cyber Tiers</span></h2>
+    <div class="tier-grid">
+        {% for cat in categories %}
+        <div class="tier-card" style="--card-accent: {{ cat.accent_color }};">
+            <div class="tier-header">
+                <div class="tier-icon">{{ cat.icon }}</div>
+                <div class="tier-level-badge" style="background: {{ cat.accent_color }}22; color: {{ cat.accent_color }}; border: 1px solid {{ cat.accent_color }}55;">{{ cat.badge_label }}</div>
+            </div>
+            <h3 class="tier-title" style="color: {{ cat.accent_color }};">{{ cat.title }}</h3>
+            <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.5rem;">{{ cat.subtitle }}</div>
+            <p class="tier-desc">{{ cat.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

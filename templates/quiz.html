@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="hero" style="padding-top: 1rem; padding-bottom: 2rem;">
+    <div class="hero-tag" style="background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.4); color: #fde68a;">Knowledge Check</div>
+    <h1 class="hero-title"><span class="gradient-text">Quiz Arena</span></h1>
+    <p class="hero-subtitle">Test your understanding and earn extra XP.</p>
+</section>
+
+<div style="max-width: 700px; margin: 0 auto; min-height: 400px; position: relative;">
+    
+    <div id="quizContainer">
+        {% for quiz in quizzes %}
+        <div class="quiz-card" id="quiz-{{ loop.index0 }}" style="display: {% if loop.index0 == 0 %}block{% else %}none{% endif %};">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.9rem; font-weight: 700; color: var(--text-secondary);">
+                <span>Question {{ loop.index }} of {{ quizzes|length }}</span>
+                <span style="color: var(--neon-amber);">+{{ quiz.xp_reward }} XP</span>
+            </div>
+            
+            <h3 style="font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--text-primary); line-height: 1.5;">{{ quiz.question }}</h3>
+            
+            {% if quiz.code_snippet %}
+            <pre style="background: #06080e; padding: 1rem; border-radius: 12px; border: 1px solid var(--border-subtle); margin-bottom: 1.5rem; font-family: var(--font-mono); font-size: 0.9rem; color: #38bdf8; overflow-x: auto;"><code>{{ quiz.code_snippet }}</code></pre>
+            {% endif %}
+            
+            <div class="quiz-options">
+                <button class="quiz-option" data-quiz-id="{{ quiz.id }}" data-opt="A">A) {{ quiz.option_a }}</button>
+                <button class="quiz-option" data-quiz-id="{{ quiz.id }}" data-opt="B">B) {{ quiz.option_b }}</button>
+                <button class="quiz-option" data-quiz-id="{{ quiz.id }}" data-opt="C">C) {{ quiz.option_c }}</button>
+                <button class="quiz-option" data-quiz-id="{{ quiz.id }}" data-opt="D">D) {{ quiz.option_d }}</button>
+            </div>
+            
+            <div class="feedback-msg" style="margin-top: 1.5rem; font-weight: 700; text-align: center; min-height: 24px;"></div>
+            
+            <div style="text-align: right; margin-top: 1.5rem;">
+                <button class="btn-glow btn-primary next-btn" style="display: none;">Next Protocol →</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div id="completionScreen" class="glass-card" style="display: none; text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+        <h2 style="font-size: 2.2rem; margin-bottom: 1rem; color: var(--neon-green);">Arena Completed</h2>
+        <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 2rem;">You've processed all available quizzes.</p>
+        <a href="{{ url_for('dashboard') }}" class="btn-glow btn-primary">Return to Command Center</a>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let currentIdx = 0;
+    const totalQuizzes = {{ quizzes|length }};
+    
+    const optionBtns = document.querySelectorAll('.quiz-option');
+    const nextBtns = document.querySelectorAll('.next-btn');
+    
+    optionBtns.forEach(btn => {
+        btn.addEventListener('click', async function() {
+            if (this.parentElement.classList.contains('answered')) return;
+            
+            this.parentElement.classList.add('answered');
+            const quizId = this.dataset.quizId;
+            const selectedOpt = this.dataset.opt;
+            const container = this.closest('.quiz-card');
+            const feedback = container.querySelector('.feedback-msg');
+            const nextBtn = container.querySelector('.next-btn');
+            
+            try {
+                const res = await fetch('/api/submit-quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quiz_id: quizId, selected_option: selectedOpt })
+                });
+                
+                const data = await res.json();
+                
+                if (data.correct) {
+                    this.classList.add('correct');
+                    feedback.innerHTML = `<span style="color: var(--neon-green);">✓ Correct! +${data.xp_awarded} XP</span>`;
+                } else {
+                    this.classList.add('incorrect');
+                    feedback.innerHTML = `<span style="color: var(--neon-pink);">✗ Incorrect. The correct answer was ${data.correct_option}.</span>`;
+                    
+                    // highlight correct
+                    const correctBtn = container.querySelector(`[data-opt="${data.correct_option}"]`);
+                    if(correctBtn) correctBtn.classList.add('correct');
+                }
+                
+                nextBtn.style.display = 'inline-flex';
+                
+            } catch (err) {
+                feedback.innerText = 'Network error checking answer.';
+            }
+        });
+    });
+    
+    nextBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById(`quiz-${currentIdx}`).style.display = 'none';
+            currentIdx++;
+            
+            if (currentIdx < totalQuizzes) {
+                document.getElementById(`quiz-${currentIdx}`).style.display = 'block';
+            } else {
+                document.getElementById('completionScreen').style.display = 'block';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

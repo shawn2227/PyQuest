@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start;">
+    
+    <!-- LEFT COLUMN: Profile Stats -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        <div class="glass-card" style="text-align: center; padding: 2.5rem 1.5rem;">
+            <div style="width: 120px; height: 120px; margin: 0 auto 1.5rem; background: rgba(168, 85, 247, 0.1); border: 2px solid var(--neon-purple); border-radius: 24px; padding: 0.5rem; box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ user.avatar }}&backgroundColor=transparent" alt="Avatar" style="width: 100%; height: 100%;">
+            </div>
+            
+            <h1 style="font-size: 1.8rem; margin-bottom: 0.25rem;">{{ user.username }}</h1>
+            <div style="color: var(--neon-cyan); font-weight: 700; margin-bottom: 1.5rem; letter-spacing: 1px; text-transform: uppercase; font-size: 0.9rem;">{{ user.title }}</div>
+            
+            <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem;">
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">{{ level }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Level</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--neon-amber);">{{ user.streak }}🔥</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase;">Day Streak</div>
+                </div>
+            </div>
+            
+            <div style="text-align: left;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-secondary);">XP Progression</span>
+                    <span style="color: var(--neon-green);">{{ user.xp }} / {{ next_lvl_xp }}</span>
+                </div>
+                <div class="tier-progress-track">
+                    <div class="tier-progress-fill" style="width: {{ (user.xp / next_lvl_xp * 100)|round }}%; background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- RIGHT COLUMN: Badges & History -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <div class="glass-card">
+            <h2 style="font-size: 1.3rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">🏅 Honors & Badges</h2>
+            
+            {% if badges %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem;">
+                {% for badge in badges %}
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 1rem; text-align: center; transition: transform 0.2s;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">{{ badge.icon }}</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-primary); line-height: 1.2;">{{ badge.name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--text-secondary); font-style: italic;">Your display case is empty. Complete sectors to earn badges.</p>
+            {% endif %}
+        </div>
+        
+        <div class="glass-card">
+            <h2 style="font-size: 1.3rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">📜 Mission Log</h2>
+            
+            {% if completed_quests %}
+            <div style="display: flex; flex-direction: column; gap: 1rem; max-height: 400px; overflow-y: auto; padding-right: 0.5rem;">
+                {% for log in completed_quests %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: rgba(255,255,255,0.02); border-left: 3px solid {{ log.accent_color }}; border-radius: 8px;">
+                    <div>
+                        <h4 style="font-size: 1.05rem; color: var(--text-primary); margin-bottom: 0.2rem;">{{ log.title }}</h4>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Completed on {{ log.completed_at.strftime('%Y-%m-%d') }}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: var(--neon-amber); font-weight: 700; font-size: 0.9rem;">+{{ log.xp_reward }} XP</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">{{ log.difficulty }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--text-secondary); font-style: italic;">No missions completed yet.</p>
+            {% endif %}
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

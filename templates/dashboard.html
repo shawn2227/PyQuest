@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- Welcome Header -->
+    <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Welcome back, <span class="gradient-text">{{ user.username }}</span></h1>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span class="xp-badge" style="font-size: 1rem; padding: 0.4rem 1rem;">{{ user.xp }} XP</span>
+                <span style="font-weight: 700; color: var(--neon-amber);">Level {{ level }}</span>
+            </div>
+        </div>
+        
+        <div style="min-width: 250px; flex-grow: 1; max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 600;">
+                <span style="color: var(--text-secondary);">Next Level Progress</span>
+                <span style="color: var(--neon-cyan);">{{ curr_xp }} / {{ next_lvl_xp }} XP</span>
+            </div>
+            <div class="tier-progress-track">
+                <div class="tier-progress-fill" style="width: {{ progress_pct }}%; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <!-- Category Progress -->
+            <section>
+                <h2 style="font-size: 1.5rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                    🎯 <span style="color: var(--text-primary);">Training Sectors</span>
+                </h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+                    {% for stat in cat_stats %}
+                    <div class="glass-card" style="padding: 1.25rem; border-left: 4px solid {{ stat.cat.accent_color }};">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                            <div style="font-size: 1.5rem;">{{ stat.cat.icon }}</div>
+                            <h3 style="font-size: 1.1rem; color: {{ stat.cat.accent_color }};">{{ stat.cat.title }}</h3>
+                        </div>
+                        <div class="tier-progress-track" style="height: 6px;">
+                            <div class="tier-progress-fill" style="width: {{ stat.pct }}%; background: {{ stat.cat.accent_color }};"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; font-weight: 600;">
+                            <span>{{ stat.completed }} / {{ stat.total }} Quests</span>
+                            <span>{{ stat.pct }}%</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+            <!-- Next Recommended Quest -->
+            {% if next_quest %}
+            <section>
+                <div class="glass-card" style="border-color: {{ next_quest.accent_color }}; box-shadow: 0 0 20px {{ next_quest.accent_color }}22;">
+                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 700;">Recommended Mission</div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.25rem;">{{ next_quest.title }}</h3>
+                    <div style="color: {{ next_quest.accent_color }}; font-size: 0.9rem; font-weight: 600; margin-bottom: 1.25rem;">{{ next_quest.cat_title }} Sector</div>
+                    <a href="{{ url_for('learn_arena', quest_id=next_quest.id) }}" class="btn-glow btn-primary" style="width: 100%; background: linear-gradient(135deg, {{ next_quest.accent_color }}, var(--neon-purple));">Resume Training ⚡</a>
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- Unlocked Badges -->
+            <section>
+                <div class="glass-card">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">🏅 Unlocked Badges</h3>
+                    {% if badges %}
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                        {% for badge in badges %}
+                        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.25rem; min-width: 70px;" title="{{ badge.name }}">
+                            <span style="font-size: 1.5rem;">{{ badge.icon }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic;">No badges earned yet. Complete quests to unlock!</p>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

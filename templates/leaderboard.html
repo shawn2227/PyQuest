@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="hero" style="padding-top: 1rem; padding-bottom: 2rem;">
+    <div class="hero-tag" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4); color: #6ee7b7;">Global Rankings</div>
+    <h1 class="hero-title"><span class="gradient-text">Hall of Fame</span></h1>
+    <p class="hero-subtitle">The most elite operatives in the cyber arcade.</p>
+</section>
+
+<div class="glass-card" style="padding: 0; overflow: hidden; max-width: 900px; margin: 0 auto;">
+    <div style="overflow-x: auto;">
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th style="width: 80px; text-align: center;">Rank</th>
+                    <th>Operative</th>
+                    <th>Title & Level</th>
+                    <th style="text-align: center;">Quests</th>
+                    <th style="text-align: center;">Badges</th>
+                    <th style="text-align: right;">Total XP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in top_users %}
+                <tr style="background: {% if u.id == user.id %}rgba(168, 85, 247, 0.1){% else %}transparent{% endif %};">
+                    <td style="text-align: center; display: flex; justify-content: center;">
+                        {% if loop.index == 1 %}
+                            <div class="rank-badge rank-1">1</div>
+                        {% elif loop.index == 2 %}
+                            <div class="rank-badge rank-2">2</div>
+                        {% elif loop.index == 3 %}
+                            <div class="rank-badge rank-3">3</div>
+                        {% else %}
+                            <div style="font-weight: 700; color: var(--text-secondary);">{{ loop.index }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <img src="https://api.dicebear.com/7.x/bottts/svg?seed={{ u.avatar }}&backgroundColor=transparent" alt="Avatar" style="width: 40px; height: 40px; border-radius: 8px; background: rgba(255,255,255,0.05);">
+                            <span style="font-weight: 700; font-size: 1.05rem; color: {% if u.id == user.id %}var(--neon-purple){% else %}var(--text-primary){% endif %};">{{ u.username }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; color: var(--neon-cyan);">{{ u.title }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Level {{ u.level }}</div>
+                    </td>
+                    <td style="text-align: center; font-weight: 600; color: var(--text-primary);">
+                        {{ u.quests_done }}
+                    </td>
+                    <td style="text-align: center; font-weight: 600; color: var(--text-primary);">
+                        {{ u.badges_count }}
+                    </td>
+                    <td style="text-align: right;">
+                        <span class="xp-badge" style="font-size: 0.95rem;">{{ u.xp }} XP</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
