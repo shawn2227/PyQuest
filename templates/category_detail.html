@@ -3,7 +3,7 @@
 {% block content %}
 <div style="margin-bottom: 1.5rem;">
     <a href="{{ url_for('categories_view') }}" class="btn-outline" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 600;">
-        ← Back to Sectors
+        ← Back to Worlds
     </a>
 </div>
 
@@ -21,7 +21,7 @@
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 1rem;">
-    <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem; padding-left: 0.5rem; border-left: 3px solid var(--neon-purple);">Available Missions</h2>
+    <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem; padding-left: 0.5rem; border-left: 3px solid var(--neon-purple);">Available Lessons</h2>
     
     {% for q in quests %}
     <a href="{{ url_for('learn_arena', quest_id=q.quest.id) }}" style="text-decoration: none; color: inherit;">
@@ -36,7 +36,7 @@
                     <h3 style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 0.2rem;">{{ q.quest.title }}</h3>
                     <div style="display: flex; gap: 1rem; font-size: 0.85rem; font-weight: 600;">
                         <span style="color: var(--neon-amber);">+{{ q.quest.xp_reward }} XP</span>
-                        <span style="color: var(--text-secondary);">Difficulty: <span style="color: {% if q.quest.difficulty == 'Easy' %}var(--neon-green){% elif q.quest.difficulty == 'Medium' %}var(--neon-amber){% else %}var(--neon-pink){% endif %};">{{ q.quest.difficulty }}</span></span>
+                        <span style="color: var(--text-secondary);">Level: <span style="color: {% if q.quest.difficulty == 'Easy' %}var(--neon-green){% elif q.quest.difficulty == 'Medium' %}var(--neon-amber){% else %}var(--neon-pink){% endif %};">{{ q.quest.difficulty }}</span></span>
                     </div>
                 </div>
             </div>
@@ -45,7 +45,7 @@
                 {% if q.completed %}
                 <span style="color: var(--neon-green);">COMPLETED</span>
                 {% else %}
-                <span>START →</span>
+                <span>LEARN →</span>
                 {% endif %}
             </div>
         </div>

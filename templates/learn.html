@@ -4,11 +4,12 @@
 <div style="max-width: 850px; margin: 0 auto;">
     <div style="margin-bottom: 1.5rem;">
         <a href="{{ url_for('category_detail', slug=quest.cat_slug) }}" class="btn-outline" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 600;">
-            ← Back to Sector
+            ← Back to World
         </a>
     </div>
 
-    <div class="glass-card" style="padding: 2.5rem;">
+    <div class="glass-card" style="padding: 2.5rem; position: relative;">
+        <!-- Header -->
         <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-subtle);">
             <div style="font-size: 3.5rem; margin-bottom: 1rem;">📚</div>
             <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; justify-content: center;">
@@ -19,15 +20,136 @@
             <p style="color: var(--neon-amber); font-weight: 700; font-size: 1.1rem;">Reward: +{{ quest.xp_reward }} XP</p>
         </div>
 
-        <div class="learning-material" style="font-size: 1.05rem; line-height: 1.7; color: var(--text-primary);">
-            {{ quest.learning_material | safe }}
+        <!-- Learning Content Container -->
+        <div id="learningContent">
+            <div class="learning-material" style="font-size: 1.1rem; line-height: 1.8; color: var(--text-primary);">
+                {{ quest.learning_material | safe }}
+            </div>
+            
+            <div class="story-box" style="margin-top: 2rem;">
+                {{ quest.story_hook }}
+            </div>
+            
+            <div style="margin-top: 3rem; text-align: center;">
+                <button id="startQuizBtn" class="btn-glow btn-primary" style="font-size: 1.2rem; padding: 1rem 2.5rem; border-radius: 16px; background: linear-gradient(135deg, {{ quest.accent_color }}, var(--neon-purple)); box-shadow: 0 8px 30px {{ quest.accent_color }}66;">
+                    Take the Quiz! 🎯
+                </button>
+            </div>
         </div>
 
-        <div style="margin-top: 3rem; text-align: center;">
-            <a href="{{ url_for('quest_arena', quest_id=quest.id) }}" class="btn-glow btn-primary" style="font-size: 1.2rem; padding: 1rem 2.5rem; border-radius: 16px; background: linear-gradient(135deg, {{ quest.accent_color }}, var(--neon-purple)); box-shadow: 0 8px 30px {{ quest.accent_color }}66;">
-                START MISSION ⚡
-            </a>
+        <!-- Quiz Container (Hidden initially) -->
+        <div id="quizContent" style="display: none; background: var(--bg-panel); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.3rem; color: var(--neon-cyan); margin: 0;">Quiz Time!</h3>
+                <button id="backToReadingBtn" class="btn-outline" style="font-size: 0.8rem; padding: 0.3rem 0.8rem; border-radius: 8px;">View Reading</button>
+            </div>
+            
+            <p style="font-size: 1.05rem; margin-bottom: 1.5rem;">{{ quest.quiz_question }}</p>
+            
+            <div class="quiz-options">
+                {% for option in quest.quiz_options_list %}
+                <button class="quiz-option lesson-quiz-btn" data-index="{{ loop.index0 }}" {% if is_completed %}disabled{% endif %}>
+                    {{ ['A', 'B', 'C', 'D'][loop.index0] }}) {{ option }}
+                </button>
+                {% endfor %}
+            </div>
+            
+            <div id="quizFeedback" style="margin-top: 1.5rem; font-weight: 700; text-align: center; min-height: 24px; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                {% if is_completed %}
+                <span style="color: var(--neon-green);">✓ You have already completed this lesson!</span>
+                <div style="margin-top: 1rem;">
+                    {% if next_quest %}
+                    <a href="{{ url_for('learn_arena', quest_id=next_quest.id) }}" class="btn-glow btn-primary" style="background: var(--neon-green); color: #000;">Next Chapter ➔</a>
+                    {% else %}
+                    <a href="{{ url_for('category_detail', slug=quest.cat_slug) }}" class="btn-glow btn-outline">Return to World</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const startQuizBtn = document.getElementById('startQuizBtn');
+    const backToReadingBtn = document.getElementById('backToReadingBtn');
+    const learningContent = document.getElementById('learningContent');
+    const quizContent = document.getElementById('quizContent');
+    
+    startQuizBtn.addEventListener('click', () => {
+        learningContent.style.display = 'none';
+        quizContent.style.display = 'block';
+    });
+    
+    backToReadingBtn.addEventListener('click', () => {
+        quizContent.style.display = 'none';
+        learningContent.style.display = 'block';
+    });
+
+    const btns = document.querySelectorAll('.lesson-quiz-btn');
+    const feedback = document.getElementById('quizFeedback');
+    
+    btns.forEach(btn => {
+        btn.addEventListener('click', async function() {
+            if (this.classList.contains('disabled') || {{ is_completed|lower }}) return;
+            
+            btns.forEach(b => b.classList.add('disabled'));
+            const selectedIdx = this.dataset.index;
+            
+            try {
+                const res = await fetch('/api/submit-lesson/{{ quest.id }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ selected_option: selectedIdx })
+                });
+                
+                const data = await res.json();
+                
+                if (data.correct) {
+                    this.classList.add('correct');
+                    if(window.soundFX) window.soundFX.playSuccess();
+                    if(window.triggerConfetti) window.triggerConfetti();
+                    
+                    let html = `<span style="color: var(--neon-green); font-size: 1.2rem;">✓ Correct! Great job!</span>`;
+                    if (data.xp_gained > 0 && !data.already_completed) {
+                        html += `<div><span style="color: var(--neon-amber);">+${data.xp_gained} XP Awarded!</span></div>`;
+                    }
+                    if (data.new_level) {
+                        html += `<div><span style="color: var(--neon-purple);">🎉 LEVEL UP → Level ${data.new_level}!</span></div>`;
+                    }
+                    if (data.new_badges && data.new_badges.length > 0) {
+                        html += `<div><span style="color: var(--neon-cyan);">🏆 Badge Unlocked: ${data.new_badges.join(', ')}</span></div>`;
+                    }
+                    
+                    // Add Next Button
+                    html += `<div style="margin-top: 1rem;">`;
+                    {% if next_quest %}
+                    html += `<a href="{{ url_for('learn_arena', quest_id=next_quest.id) }}" class="btn-glow btn-primary" style="background: var(--neon-green); color: #000; box-shadow: 0 4px 15px rgba(16,185,129,0.4);">Next Chapter ➔</a>`;
+                    {% else %}
+                    html += `<a href="{{ url_for('category_detail', slug=quest.cat_slug) }}" class="btn-glow btn-outline">Return to World</a>`;
+                    {% endif %}
+                    html += `</div>`;
+                    
+                    feedback.innerHTML = html;
+                } else {
+                    this.classList.add('incorrect');
+                    if(window.soundFX) window.soundFX.playFail();
+                    feedback.innerHTML = `<span style="color: var(--neon-pink);">✗ Oops! That's not quite right. Review the reading and try again!</span>`;
+                    
+                    setTimeout(() => {
+                        this.classList.remove('incorrect');
+                        btns.forEach(b => b.classList.remove('disabled'));
+                        feedback.innerHTML = '';
+                    }, 2000);
+                }
+                
+            } catch (err) {
+                feedback.innerText = 'Network error checking answer.';
+                btns.forEach(b => b.classList.remove('disabled'));
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

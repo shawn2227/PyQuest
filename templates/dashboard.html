@@ -5,7 +5,7 @@
     <!-- Welcome Header -->
     <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <div>
-            <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Welcome back, <span class="gradient-text">{{ user.username }}</span></h1>
+            <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Welcome back, <span class="gradient-text">{{ user.username }}</span>!</h1>
             <div style="display: flex; gap: 1rem; align-items: center;">
                 <span class="xp-badge" style="font-size: 1rem; padding: 0.4rem 1rem;">{{ user.xp }} XP</span>
                 <span style="font-weight: 700; color: var(--neon-amber);">Level {{ level }}</span>
@@ -29,7 +29,7 @@
             <!-- Category Progress -->
             <section>
                 <h2 style="font-size: 1.5rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-                    🎯 <span style="color: var(--text-primary);">Training Sectors</span>
+                    🗺️ <span style="color: var(--text-primary);">Learning Worlds</span>
                 </h2>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
                     {% for stat in cat_stats %}
@@ -42,7 +42,7 @@
                             <div class="tier-progress-fill" style="width: {{ stat.pct }}%; background: {{ stat.cat.accent_color }};"></div>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; font-weight: 600;">
-                            <span>{{ stat.completed }} / {{ stat.total }} Quests</span>
+                            <span>{{ stat.completed }} / {{ stat.total }} Lessons</span>
                             <span>{{ stat.pct }}%</span>
                         </div>
                     </div>
@@ -56,10 +56,10 @@
             {% if next_quest %}
             <section>
                 <div class="glass-card" style="border-color: {{ next_quest.accent_color }}; box-shadow: 0 0 20px {{ next_quest.accent_color }}22;">
-                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 700;">Recommended Mission</div>
+                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 700;">Recommended Lesson</div>
                     <h3 style="font-size: 1.25rem; margin-bottom: 0.25rem;">{{ next_quest.title }}</h3>
-                    <div style="color: {{ next_quest.accent_color }}; font-size: 0.9rem; font-weight: 600; margin-bottom: 1.25rem;">{{ next_quest.cat_title }} Sector</div>
-                    <a href="{{ url_for('learn_arena', quest_id=next_quest.id) }}" class="btn-glow btn-primary" style="width: 100%; background: linear-gradient(135deg, {{ next_quest.accent_color }}, var(--neon-purple));">Resume Training ⚡</a>
+                    <div style="color: {{ next_quest.accent_color }}; font-size: 0.9rem; font-weight: 600; margin-bottom: 1.25rem;">{{ next_quest.cat_title }}</div>
+                    <a href="{{ url_for('learn_arena', quest_id=next_quest.id) }}" class="btn-glow btn-primary" style="width: 100%; background: linear-gradient(135deg, {{ next_quest.accent_color }}, var(--neon-purple));">Start Lesson 🌟</a>
                 </div>
             </section>
             {% endif %}
@@ -67,7 +67,7 @@
             <!-- Unlocked Badges -->
             <section>
                 <div class="glass-card">
-                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">🏅 Unlocked Badges</h3>
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">🏅 My Badges</h3>
                     {% if badges %}
                     <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
                         {% for badge in badges %}
@@ -77,7 +77,7 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic;">No badges earned yet. Complete quests to unlock!</p>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; font-style: italic;">No badges earned yet. Complete lessons to unlock!</p>
                     {% endif %}
                 </div>
             </section>

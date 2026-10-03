@@ -3,25 +3,25 @@
 {% block content %}
 <div style="display: flex; justify-content: center; align-items: center; min-height: 60vh;">
     <div class="glass-card" style="width: 100%; max-width: 450px;">
-        <h2 style="text-align: center; margin-bottom: 0.5rem; font-size: 1.8rem;">Operative <span class="gradient-text">Login</span></h2>
-        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Access your command center</p>
+        <h2 style="text-align: center; margin-bottom: 0.5rem; font-size: 1.8rem;">Explorer <span class="gradient-text">Login</span></h2>
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Ready to learn something new?</p>
         
         <form method="POST" action="{{ url_for('login') }}" style="display: flex; flex-direction: column; gap: 1.25rem;">
             <div>
-                <label for="login_id" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Username or Email</label>
+                <label for="login_id" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Username</label>
                 <input type="text" id="login_id" name="login_id" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; outline: none;">
             </div>
             
             <div>
-                <label for="password" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Password</label>
+                <label for="password" style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">Secret Password</label>
                 <input type="password" id="password" name="password" required style="width: 100%; padding: 0.85rem 1rem; border-radius: 12px; background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; outline: none;">
             </div>
             
-            <button type="submit" class="btn-glow btn-primary" style="margin-top: 1rem; width: 100%;">Initialize Connection ⚡</button>
+            <button type="submit" class="btn-glow btn-primary" style="margin-top: 1rem; width: 100%;">Let's Go! 🚀</button>
         </form>
         
         <p style="text-align: center; margin-top: 2rem; font-size: 0.9rem; color: var(--text-secondary);">
-            Don't have clearance yet? <a href="{{ url_for('register') }}" style="color: var(--neon-cyan); text-decoration: none; font-weight: 600;">Request Access</a>
+            New here? <a href="{{ url_for('register') }}" style="color: var(--neon-cyan); text-decoration: none; font-weight: 600;">Join the adventure!</a>
         </p>
     </div>
 </div>

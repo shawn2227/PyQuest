@@ -18,7 +18,7 @@
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   
-  --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-main: 'Nunito', 'Fredoka', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', Menlo, monospace;
 }
 
@@ -741,4 +741,21 @@ body {
 }
 .learning-material li {
   margin-bottom: 0.25rem;
+}
+
+/* Custom additions for CompuQuest */
+.lesson-quiz-btn.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+.lesson-quiz-btn.correct {
+    background: rgba(16, 185, 129, 0.25) !important;
+    border-color: var(--neon-green) !important;
+    color: #6ee7b7 !important;
+}
+.lesson-quiz-btn.incorrect {
+    background: rgba(244, 63, 94, 0.25) !important;
+    border-color: var(--neon-pink) !important;
+    color: #fda4af !important;
 }
