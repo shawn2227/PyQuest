@@ -80,7 +80,10 @@ def award_badges_check(user_id, conn):
 def index():
     user = get_current_user()
     conn = get_db_connection()
-    categories = conn.execute('SELECT * FROM categories ORDER BY order_idx ASC').fetchall()
+    if user:
+        categories = conn.execute('SELECT * FROM categories WHERE min_grade <= ? AND max_grade >= ? ORDER BY order_idx ASC', (user['grade'], user['grade'])).fetchall()
+    else:
+        categories = conn.execute('SELECT * FROM categories ORDER BY order_idx ASC').fetchall()
     total_quests = conn.execute('SELECT COUNT(*) as count FROM quests').fetchone()['count']
     total_users = conn.execute('SELECT COUNT(*) as count FROM users').fetchone()['count']
     conn.close()
@@ -109,10 +112,11 @@ def register():
 
         hashed = generate_password_hash(password, method='pbkdf2:sha256')
         cursor = conn.cursor()
+        grade = request.form.get('grade', 1, type=int)
         cursor.execute('''
-            INSERT INTO users (username, email, password_hash, avatar, xp, level, streak, title)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (username, email, hashed, avatar, 0, 1, 1, 'Explorer'))
+            INSERT INTO users (username, email, password_hash, avatar, xp, level, streak, title, grade)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (username, email, hashed, avatar, 0, 1, 1, 'Explorer', grade))
         conn.commit()
         user_id = cursor.lastrowid
         conn.close()
@@ -160,7 +164,7 @@ def dashboard():
     lvl, curr_xp, next_lvl_xp = calculate_level(user['xp'])
     progress_pct = min(100, int((curr_xp / next_lvl_xp) * 100))
 
-    categories = conn.execute('SELECT * FROM categories ORDER BY order_idx ASC').fetchall()
+    categories = conn.execute('SELECT * FROM categories WHERE min_grade <= ? AND max_grade >= ? ORDER BY order_idx ASC', (user['grade'], user['grade'])).fetchall()
     cat_stats = []
     for cat in categories:
         total = conn.execute('SELECT COUNT(*) as count FROM quests WHERE category_slug = ?', (cat['slug'],)).fetchone()['count']
@@ -195,7 +199,10 @@ def dashboard():
 def categories_view():
     user = get_current_user()
     conn = get_db_connection()
-    categories = conn.execute('SELECT * FROM categories ORDER BY order_idx ASC').fetchall()
+    if user:
+        categories = conn.execute('SELECT * FROM categories WHERE min_grade <= ? AND max_grade >= ? ORDER BY order_idx ASC', (user['grade'], user['grade'])).fetchall()
+    else:
+        categories = conn.execute('SELECT * FROM categories ORDER BY order_idx ASC').fetchall()
     
     cat_data = []
     for c in categories:
@@ -214,11 +221,20 @@ def categories_view():
 @app.route('/category/<slug>')
 def category_detail(slug):
     user = get_current_user()
+    if not user:
+        flash('Please login to explore worlds.', 'warning')
+        return redirect(url_for('login'))
+        
     conn = get_db_connection()
     category = conn.execute('SELECT * FROM categories WHERE slug = ?', (slug,)).fetchone()
     if not category:
         conn.close()
         flash('World not found.', 'error')
+        return redirect(url_for('categories_view'))
+        
+    if user['grade'] < category['min_grade'] or user['grade'] > category['max_grade']:
+        conn.close()
+        flash('This world is not available for your grade level.', 'warning')
         return redirect(url_for('categories_view'))
 
     quests = conn.execute('SELECT * FROM quests WHERE category_slug = ? ORDER BY order_idx ASC', (slug,)).fetchall()
@@ -251,6 +267,12 @@ def learn_arena(quest_id):
     if not quest_row:
         conn.close()
         flash('Lesson not found.', 'error')
+        return redirect(url_for('categories_view'))
+        
+    category = conn.execute('SELECT * FROM categories WHERE slug = ?', (quest_row['cat_slug'],)).fetchone()
+    if user['grade'] < category['min_grade'] or user['grade'] > category['max_grade']:
+        conn.close()
+        flash('This lesson is not available for your grade level.', 'warning')
         return redirect(url_for('categories_view'))
 
     # Convert row to dict to parse JSON
